@@ -33,27 +33,31 @@ void draw_reticle(int offset_x, int offset_y) {
 	display.OLEDupdate();
 }
 
-int main(int argc, char** argv) {
+bool init_display() {
 	if (!bcm2835_init()) {
 		printf("bcm library could not initialize\n");
-		return 1;
+		return false;
 	}
-
+	
+	// init display
 	bcm2835_delay(500);
 	display.OLEDbegin(speed, display_address);
 	bcm2835_delay(1000);
 
+	// create display buffer
 	uint8_t buffer[(128 * (64/8)) + 1];
 	display.buffer = (uint8_t*) &buffer;
 
+	// configure display text
 	display.setTextWrap(false);
 	display.setFontNum(OLEDFontType_Tiny);
-
-	display.OLEDclearBuffer();
-
 	display.setTextColor(WHITE);
 	display.setTextSize(1);
 
+	// clear display buffer
+	display.OLEDclearBuffer();
+
+	// draw reticle and basic hud
 	display.setCursor(35, 0);
 	display.print("AZ");
 	display.setCursor(80, 0);
@@ -61,17 +65,21 @@ int main(int argc, char** argv) {
 
 	draw_reticle(0, -5);
 	
+	// test pattern
+
 	for (int j = 0; j < 3; j++) {
 		for (int i = 0; i < 360; i++) {
-			update_heading(i, i);
+			update_heading(0, 0);
 			printf("iterating: %d\n", i);
 		}
 	}
 
+	// turn off display for testing
 	display.OLEDPowerDown();
 	bcm2835_close();
+
 	printf("finished test\n");
 	
-	return 0;
+	return true;
 }
 
