@@ -27,7 +27,7 @@
 
 #define CAL_REG 0x35
 
-class imu {
+class IMU {
 	public:
 		uint16_t qua_z;
 		uint16_t qua_y;
@@ -61,49 +61,76 @@ class imu {
 		void update_roll();
 		void update_all();
 		
+		IMU();
 };
 
-void imu::read_calibration() {
+IMU::IMU() {
+	qua_z = 0;
+	qua_z = 0;
+	qua_z = 0;
+
+	gyro_z = 0;
+	gyro_z = 0;
+	gyro_z = 0;
+
+	mag_z = 0;
+	mag_z = 0;
+	mag_z = 0;
+
+	acc_z = 0;
+	acc_z = 0;
+	acc_z = 0;
+
+	temp = 0;
+	pitch = 0;
+	roll = 0;
+
+	calibration = 0b00000000;
+
+	printf("created new imu object...");
+}
+
+void IMU::read_calibration() {
 	calibration = wiringPiI2CReadReg8(ADDR, CAL_REG);
 }
 
-void imu::update_qua() {
+void IMU::update_qua() {
 	qua_z = wiringPiI2CReadReg16(ADDR, QUA_Z);
 	qua_y = wiringPiI2CReadReg16(ADDR, QUA_Y);
 	qua_x = wiringPiI2CReadReg16(ADDR, QUA_X);
 }
 
-void imu::update_gyro() {
+void IMU::update_gyro() {
 	gyro_z = wiringPiI2CReadReg16(ADDR, GYRO_Z);
 	gyro_y = wiringPiI2CReadReg16(ADDR, GYRO_Y);
 	gyro_x = wiringPiI2CReadReg16(ADDR, GYRO_X);
 }
 
-void imu::update_mag() {
+void IMU::update_mag() {
 	mag_z = wiringPiI2CReadReg16(ADDR, MAG_Z);
 	mag_y = wiringPiI2CReadReg16(ADDR, MAG_Y);
 	mag_x = wiringPiI2CReadReg16(ADDR, MAG_X);
 }
 
-void imu::update_acc() {
+void IMU::update_acc() {
 	acc_z = wiringPiI2CReadReg16(ADDR, ACC_Z);
 	acc_y = wiringPiI2CReadReg16(ADDR, ACC_Y);
 	acc_x = wiringPiI2CReadReg16(ADDR, ACC_X);
 }
 
-void imu::update_temp() {
+void IMU::update_temp() {
 	temp = wiringPiI2CReadReg16(ADDR, TEMP);
 }
 
-void imu::update_pitch() {
+void IMU::update_pitch() {
 	pitch = wiringPiI2CReadReg16(ADDR, PITCH);
 }
 
-void imu::update_roll() {
+void IMU::update_roll() {
 	roll = wiringPiI2CReadReg16(ADDR, ROLL);
 }
 
-void imu::update_all() {
+void IMU::update_all() {
 	if (calibration == 0xff) {
 		update_qua();
 		update_gyro();
@@ -114,6 +141,6 @@ void imu::update_all() {
 		update_roll();
 	}
 	else {
-		printf("imu not fully calibrated: %d\n", calibration);
+		printf("IMU not fully calibrated: %d\n", calibration);
 	}
 }
