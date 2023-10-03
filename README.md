@@ -15,3 +15,6 @@ A [plate solving](https://en.wikipedia.org/wiki/Astrometric_solving), orientatio
 
 ![alt text](./img/hud.jpeg)
 *The current altitude and azumith are displayed (degrees) and the reticle is adjustable in software*
+
+![alt text](./img/mounted1.jpeg)
+*Still a very rough prototype :)*
