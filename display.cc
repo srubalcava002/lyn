@@ -4,13 +4,18 @@
 #include <SSD1306_OLED_Print.hpp>
 #include <string>
 
+#define CALIBRATION_X 0
+#define CALIBRATION_Y -5
+
 uint16_t speed = 626;
 uint8_t display_address = 0x3c;
 SSD1306 display = SSD1306(128, 64);
 
+uint8_t buffer[(128 * (64/8)) + 1];
 
 void draw_reticle(int offset_x, int offset_y);
 void update_heading(int alt, int az);
+void test_display();
 
 void update_heading(int alt, int az) {
 	// clear old values
@@ -45,7 +50,6 @@ bool init_display() {
 	bcm2835_delay(1000);
 
 	// create display buffer
-	uint8_t buffer[(128 * (64/8)) + 1];
 	display.buffer = (uint8_t*) &buffer;
 
 	// configure display text
@@ -63,15 +67,19 @@ bool init_display() {
 	display.setCursor(80, 0);
 	display.print("ALT");
 
-	draw_reticle(0, -5);
+	draw_reticle(CALIBRATION_X, CALIBRATION_Y);
 	
-	// test pattern
+	return true;
+}
 
-	for (int j = 0; j < 3; j++) {
-		for (int i = 0; i < 360; i++) {
-			update_heading(0, 0);
-			printf("iterating: %d\n", i);
-		}
+// call after initializing display
+void test_display() {
+	printf("starting display test...\n");
+
+	// test pattern
+	for (int i = 0; i < 360; i++) {
+		update_heading(i, i);
+		printf("iterating: %d\n", i);
 	}
 
 	// turn off display for testing
@@ -79,7 +87,5 @@ bool init_display() {
 	bcm2835_close();
 
 	printf("finished test\n");
-	
-	return true;
 }
 
