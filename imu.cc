@@ -1,5 +1,7 @@
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
+#include <cstdint>
+#include <stdio.h>
 
 #define ADDR 0xff
 
