@@ -1,4 +1,4 @@
-#include "imu.cc"
+#include "pos.cc"
 #define BCM2835_NO_DELAY_COMPATIBILITY
 #include "display.cc"
 #include <stdio.h>
@@ -27,9 +27,11 @@ int main(int argc, char** argv) {
 		printf("display initialized\n");
 	}
 
-	IMU *imu = new IMU();
+	imu_fake *imu = new imu_fake();
 
 	test_display();
 
 	return 0;
 }
+
+
