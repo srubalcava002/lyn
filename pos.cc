@@ -1,7 +1,9 @@
-#include <wiringPi.h>
-#include <wiringPiI2C.h>
-#include <cstdint>
-#include <stdio.h>
+/*
+ * this file has definitions for objects that produce information about positioning...
+ *
+ * 
+*/
+
 #include "pos.h"
 
 IMU::IMU() {
@@ -120,5 +122,29 @@ imu_fake::imu_fake() {
 
 	az = 0;
 
+	moving = false;
+
 	printf("created new fake imu object...");
+}
+
+// chooses between imu or plate solver data based on movement
+void plate_fake::generate_test_data() {
+	while (true) {
+		if (imu.moving) {
+			// get data from imu
+			az = imu.az;
+			alt = imu.alt;
+		}
+		else {
+			// get data from plate solver
+			// fakes the data here for now
+			az++;
+			alt++;
+		}
+	}
+}
+
+plate_fake::plate_fake() {
+	// unimplemented
+	// should probably init imu and plate solver here
 }

@@ -1,3 +1,8 @@
+/*
+ * this file has definitions for objects that produce information about positioning...
+ *
+ * 
+*/
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 #include <cstdint>
@@ -88,9 +93,12 @@ class imu_fake {
 		uint16_t pitch;
 		uint16_t roll;
 
+		uint16_t alt;
 		uint16_t az; 
 
 		uint8_t calibration;
+
+		bool moving;
 
 		/*
 		void read_calibration();
@@ -109,4 +117,29 @@ class imu_fake {
 		imu_fake();
 
 
+};
+
+// unimplemented
+// should interface with the camera and produce an image
+// also contains its own local data that should be interpreted as 
+// the main reference 
+class PLATE {
+};
+
+// unimplemented
+// produces fake test data
+class plate_fake {
+	public:
+		imu_fake imu;
+		float az;
+		float alt;
+
+		void generate_test_data();
+		plate_fake();
+};
+
+class positioner {
+	public:
+		PLATE plate;
+		IMU imu;
 };

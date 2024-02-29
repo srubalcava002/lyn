@@ -2,6 +2,7 @@
 #define BCM2835_NO_DELAY_COMPATIBILITY
 #include "display.cc"
 #include <stdio.h>
+#include <thread>
 
 /*
 #include <wiringPi.h>
@@ -19,6 +20,7 @@ double current_ra = 0;
 double current_dec = 0;
 
 int main(int argc, char** argv) {
+	// maybe have the main display loop init the display
 	if (!init_display()) {
 		printf("problem initializing display!\n");
 		return -1;
@@ -27,11 +29,16 @@ int main(int argc, char** argv) {
 		printf("display initialized\n");
 	}
 
-	imu_fake *imu = new imu_fake();
+	// needs to be refactored create the new object thing
+	plate_fake *plate = new plate_fake();
 
-	test_display();
+	// create thread to handle display
+	std::thread display_thread(start_display_loop, plate);
+
+	// create thread to handle orientation
+	// read up on calling member functions as thread
+	//std::thread orientation_thread(generate_test_data, plate);
 
 	return 0;
 }
-
 
