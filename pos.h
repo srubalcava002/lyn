@@ -8,6 +8,11 @@
 #include <cstdint>
 #include <stdio.h>
 
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <stdlib.h>
+#include <string.h>
+
 #define ADDR 0xff
 
 #define TEMP 0x34
@@ -57,6 +62,10 @@ class IMU {
 		uint16_t roll;
 
 		uint8_t calibration;
+
+		uint16_t moving_threshold;
+
+		bool moving = false;
 
 		void read_calibration();
 		void update_qua();
@@ -124,6 +133,12 @@ class imu_fake {
 // also contains its own local data that should be interpreted as 
 // the main reference 
 class PLATE {
+	public:
+		const char* socket_path = "~/lyn/image_q";
+		struct sockaddr_un addr;
+		int socket_fd;
+
+		PLATE();
 };
 
 // unimplemented
@@ -138,8 +153,19 @@ class plate_fake {
 		plate_fake();
 };
 
-class positioner {
-	public:
-		PLATE plate;
-		IMU imu;
+void start_orientation_thread(struct position_resolution* prs);
+
+struct global_data {
+	float ra;
+	float dec;
+	float alt;
+	float az;
+};
+
+// needs to exist to keep std::thread happy
+// only takes one arg
+struct position_resolution {
+	PLATE* plate;
+	IMU* imu;
+	global_data* data;
 };

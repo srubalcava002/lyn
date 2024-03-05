@@ -16,10 +16,10 @@
 #include <string>
 */
 
-double current_ra = 0;
-double current_dec = 0;
 
 int main(int argc, char** argv) {
+	global_data* data = (global_data*) malloc(sizeof(global_data));
+
 	// maybe have the main display loop init the display
 	if (!init_display()) {
 		printf("problem initializing display!\n");
@@ -29,15 +29,26 @@ int main(int argc, char** argv) {
 		printf("display initialized\n");
 	}
 
+	// according to the plan:
+	// one thread handles the display
+	// one thread handles positioning (with two child threads for imu and plate solver)
 	// needs to be refactored create the new object thing
 	plate_fake *plate = new plate_fake();
+	PLATE *plate_real = new PLATE();
+	IMU *imu = new IMU();
+
+	position_resolution* prs = (position_resolution*) malloc(sizeof(position_resolution)); 
+	prs->plate = plate_real;
+	prs->imu = imu;
+	prs->data = data;
 
 	// create thread to handle display
 	std::thread display_thread(start_display_loop, plate);
 
 	// create thread to handle orientation
-	// read up on calling member functions as thread
-	//std::thread orientation_thread(generate_test_data, plate);
+	std::thread orientation_thread(start_orientation_thread, prs);
+	
+	printf("started all threads\n");
 
 	return 0;
 }

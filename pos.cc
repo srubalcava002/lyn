@@ -29,6 +29,8 @@ IMU::IMU() {
 
 	calibration = 0b00000000;
 
+	moving_threshold = 0;
+
 	printf("created new imu object...");
 }
 
@@ -81,6 +83,14 @@ void IMU::update_all() {
 		update_temp();
 		update_pitch();
 		update_roll();
+
+		// threshold needs tuning
+		if (acc_x + acc_y + acc_z > moving_threshold) {
+			moving = true;
+		}
+		else {
+			moving = false;
+		}
 	}
 	else {
 		printf("IMU not fully calibrated: %d\n", calibration);
@@ -148,3 +158,45 @@ plate_fake::plate_fake() {
 	// unimplemented
 	// should probably init imu and plate solver here
 }
+
+PLATE::PLATE() {
+	// init socket for communication with tetra here
+	socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+
+	addr.sun_family = AF_UNIX;
+	strncpy(addr.sun_path, socket_path, sizeof(addr.sun_path));
+
+	if (socket_fd == -1) {
+		printf("problem creating tetra socket...\n");
+	}
+	
+
+	if (bind(socket_fd, (struct sockaddr *) &addr, sizeof(addr) == -1)) {
+		printf("problem binding socket...\n");
+	}
+
+	if (listen(socket_fd, 50) == -1) {
+		printf("problem with listen() call...\n");
+	}
+
+	socklen_t size = sizeof(addr);
+	if (accept(socket_fd, (struct sockaddr *) &addr, &size) == -1) {
+		printf("problem with accepting connections...\n");
+	}
+
+	// start the python script here
+	
+}
+
+void start_orientation_thread(struct position_resolution* prs) {
+	// main loop here
+	while (true) {
+		if (prs->imu->moving) {
+			printf("using imu data\n");
+		}
+		else {
+			printf("using plate solve data\n");
+		}
+	}
+}
+
