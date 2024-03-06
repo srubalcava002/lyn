@@ -13,6 +13,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <thread>
+
+#include <unistd.h>
+
 #define ADDR 0xff
 
 #define TEMP 0x34
@@ -67,6 +71,9 @@ class IMU {
 
 		bool moving = false;
 
+		float alt;
+		float az;
+
 		void read_calibration();
 		void update_qua();
 		void update_gyro();
@@ -76,56 +83,10 @@ class IMU {
 		void update_pitch();
 		void update_roll();
 		void update_all();
+
+		void update_loop();
 		
 		IMU();
-};
-
-class imu_fake {
-	public:
-		uint16_t qua_z;
-		uint16_t qua_y;
-		uint16_t qua_x;
-
-		uint16_t gyro_z;
-		uint16_t gyro_y;
-		uint16_t gyro_x;
-
-		uint16_t mag_z;
-		uint16_t mag_y;
-		uint16_t mag_x;
-
-		uint16_t acc_z;
-		uint16_t acc_y;
-		uint16_t acc_x;
-
-		uint16_t temp;
-		uint16_t pitch;
-		uint16_t roll;
-
-		uint16_t alt;
-		uint16_t az; 
-
-		uint8_t calibration;
-
-		bool moving;
-
-		/*
-		void read_calibration();
-		void update_qua();
-		void update_gyro();
-		void update_mag();
-		void update_acc();
-		void update_temp();
-		void update_pitch();
-		void update_roll();
-		void update_all();
-		*/
-
-		void fake_data();
-
-		imu_fake();
-
-
 };
 
 // unimplemented
@@ -134,38 +95,28 @@ class imu_fake {
 // the main reference 
 class PLATE {
 	public:
-		const char* socket_path = "~/lyn/image_q";
+		const char* socket_path = "/home/user/lyn/image_q";
 		struct sockaddr_un addr;
 		int socket_fd;
+
+		float alt;
+		float az;
+		float roll;
+
+		void update_loop(struct position_resolution* prs);
 
 		PLATE();
 };
 
-// unimplemented
-// produces fake test data
-class plate_fake {
-	public:
-		imu_fake imu;
-		float az;
-		float alt;
-
-		void generate_test_data();
-		plate_fake();
-};
-
 void start_orientation_thread(struct position_resolution* prs);
-
-struct global_data {
-	float ra;
-	float dec;
-	float alt;
-	float az;
-};
 
 // needs to exist to keep std::thread happy
 // only takes one arg
 struct position_resolution {
 	PLATE* plate;
 	IMU* imu;
-	global_data* data;
+	float ra;
+	float dec;
+	float alt;
+	float az;
 };

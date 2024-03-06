@@ -12,9 +12,10 @@ uint16_t speed = 626;
 uint8_t display_address = 0x3c;
 SSD1306 display = SSD1306(128, 64);
 
+// + 1
 bool buffer_flag = false;
-uint8_t buffer[(128 * (64/8)) + 1];
-uint8_t buffer2[(128 * (64/8)) + 1];
+uint8_t buffer[(128 * (64/8))];
+uint8_t buffer2[(128 * (64/8))];
 
 void draw_reticle(int offset_x, int offset_y);
 void update_heading(int alt, int az);
@@ -44,16 +45,19 @@ void draw_reticle(int offset_x, int offset_y) {
 }
 
 bool init_display() {
+	printf("initializing display...\n");
 	if (!bcm2835_init()) {
 		printf("bcm library could not initialize\n");
 		return false;
 	}
-	
+	printf("bcm library initialized\n");
+
 	// init display
 	bcm2835_delay(500);
 	display.OLEDbegin(speed, display_address);
 	bcm2835_delay(1000);
 
+	printf("hi sir\n");
 	// create display buffer
 	//display.OLEDbuffer = (uint8_t*) &buffer;
 	display.OLEDSetBufferPtr(128, 64, buffer, sizeof(buffer));
@@ -67,6 +71,8 @@ bool init_display() {
 	// clear display buffer
 	display.OLEDclearBuffer();
 
+	/*
+	 * comment out for testing
 	// draw reticle and basic hud
 	display.setCursor(35, 0);
 	display.print("AZ");
@@ -74,6 +80,7 @@ bool init_display() {
 	display.print("ALT");
 
 	draw_reticle(CALIBRATION_X, CALIBRATION_Y);
+	*/
 	
 	return true;
 }
@@ -134,20 +141,7 @@ void update_display() {
 // i guess the map also needs to be updated
 //
 // call the this from thread in main!
-void start_display_loop(plate_fake *plate) {
-	pid_t display_pid = fork();
-
-	if (display_pid == -1) {
-		printf("PROBLEM STARTING DISPLAY LOOP\n");
-		return;
-	}
-	else if (display_pid > 0) {
-		while (true) {
-			update_heading(0, plate->imu.az);
-		}
-	}
-	else {
-		printf("STARTED DISPLAY LOOP\n");
-	}
+void start_display_loop(struct position_resolution* prs) {
+	printf("starting display loop\n");
 }
 
