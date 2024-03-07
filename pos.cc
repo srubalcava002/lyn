@@ -6,6 +6,8 @@
 
 #include "pos.h"
 
+void log(int level, char* message);
+
 IMU::IMU() {
 	qua_z = 0;
 	qua_z = 0;
@@ -99,6 +101,7 @@ void IMU::update_all() {
 		}
 	}
 	else {
+		log(2, "IMU not fully calibrated");
 		printf("IMU not fully calibrated: %d\n", calibration);
 	}
 
@@ -106,7 +109,7 @@ void IMU::update_all() {
 }
 
 PLATE::PLATE() {
-	printf("creating lyn <-> python unix socket...\n");
+	log(1, "creating lyn <-> python unix socket...\n");
 	// init socket for communication with tetra here
 	socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
 
@@ -116,25 +119,28 @@ PLATE::PLATE() {
 	strncpy(addr.sun_path, socket_path, sizeof(addr.sun_path) - 1);
 
 	if (socket_fd == -1) {
-		printf("problem creating tetra socket...\n");
+		log(2, "problem creating tetra socket...");
 	}
-	
-	int bindret = bind(socket_fd, (struct sockaddr *) &addr, sizeof(struct sockaddr_un));
-	if (bindret == -1) {
-		printf("problem binding socket...\n%d", errno);
+	log(0, "created tetra socket");
+
+	if (bind(socket_fd, (struct sockaddr *) &addr, sizeof(struct sockaddr_un)) == -1) {
+		log(2, "problem binding socket...");
 	}
+	log(0, "socket bound");
 
 	if (listen(socket_fd, 50) == -1) {
-		printf("problem with listen() call...\n");
+		log(2, "problem with listen() call...");
 	}
+	log(0, "marked socket to listen");
 
 	socklen_t size = sizeof(addr);
 	if (accept(socket_fd, (struct sockaddr *) &addr, &size) == -1) {
-		printf("problem with accepting connections...\n");
+		log(2, "problem with accepting connections...");
 	}
+	log(0, "accepting connections");
 
 	// start the python script here
-	printf("starting python script...\n");
+	log(1, "starting python script...");
 
 	// can pass args to the camera here
 	// maybe have a default exposure setting if
@@ -142,17 +148,17 @@ PLATE::PLATE() {
 	char** camargs = {NULL};
 	char** camenv = {NULL};
 	execve("/home/user/lyn/cam.py", camargs, camenv);
-	
-	
 }
 
 void IMU::update_loop() {
+	log(1, "started imu update loop");
 	while (true) {
 		update_all();
 	}
 }
 
 void PLATE::update_loop(struct position_resolution* prs) {
+	log(1, "started plate solver update loop\n");
 	while (true) {
 		if (prs->imu->moving) {
 			continue;
@@ -167,15 +173,32 @@ void start_orientation_thread(struct position_resolution* prs) {
 	// main loop here
 	while (true) {
 		if (prs->imu->moving) {
-			printf("using imu data\n");
+			log(0, "using imu data");
 			prs->alt = prs->imu->alt;
 			prs->az = prs->imu->az;
 		}
 		else {
-			printf("using plate solve data\n");
+			log(0, "using plate solve data");
 			prs->alt = prs->plate->alt;
 			prs->az = prs->plate->az;
 		}
 	}
+}
+
+void log(int level, char* message) {
+	switch (level) {
+		case 0:
+			printf("[DEBUG]\t");
+			break;
+		case 1:
+			printf("[INFO]\t");
+			break;
+		case 2:
+			printf("[ERROR]\t");
+			break;
+		default:
+			break;
+	}
+	printf("%s\n", message);
 }
 
