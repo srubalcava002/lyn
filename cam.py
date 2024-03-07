@@ -2,9 +2,9 @@
 import os
 import sys
 sys.path.insert(1, '~/tetra3')
-import tetra3
+from tetra3 import Tetra3
 import socket
-#from PIL import image
+from PIL import Image
 
 # send coordinates to lyn
 # not the image

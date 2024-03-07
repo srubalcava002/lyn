@@ -133,12 +133,6 @@ PLATE::PLATE() {
 	}
 	log(0, "marked socket to listen");
 
-	socklen_t size = sizeof(addr);
-	if (accept(socket_fd, (struct sockaddr *) &addr, &size) == -1) {
-		log(2, "problem with accepting connections...");
-	}
-	log(0, "accepting connections");
-
 	// start the python script here
 	log(1, "starting python script...");
 
@@ -148,6 +142,24 @@ PLATE::PLATE() {
 	char** camargs = {NULL};
 	char** camenv = {NULL};
 	execve("/home/user/lyn/cam.py", camargs, camenv);
+
+	socklen_t size = sizeof(addr);
+	if (accept(socket_fd, (struct sockaddr *) &addr, &size) == -1) {
+		log(2, "problem with accepting connections...");
+	}
+	log(0, "accepting connections");
+
+	/*
+	// start the python script here
+	log(1, "starting python script...");
+
+	// can pass args to the camera here
+	// maybe have a default exposure setting if
+	// not using args here
+	char** camargs = {NULL};
+	char** camenv = {NULL};
+	execve("/home/user/lyn/cam.py", camargs, camenv);
+	*/
 }
 
 void IMU::update_loop() {
